@@ -3,23 +3,23 @@ httpcbench
 
 Erlang HTTP client benchmarks
 
-The current test attempts to create 1000 concurrent https connections to a local server, which
+The current test attempts to create 5000 concurrent http connections to a local server, which
 responds after 10 ms.
 
 ## Results ##
 
-Results show results at 100 iterations (100,000 connections).
+Results show results at 20 iterations (100,000 connections).
 
 | Client | runtime | wall_clock | mem | failures |
-| ------ | --:| --:| ---:| --------:|
-| hackney (default pool) | 38560 | 30912 | 16.110 | 0 |
-| httpc | 34080 | 27913 | 54.083 | 0 |
-| httpc (optimized) | 33540 | 26981 | 55.402 | 0 |
-| ibrowse | 212720 | 112853 | 14.567 | 0 |
-| ibrowse (optimized) | 22410 | 21029 | 59.849 | 0 |
-| lhttpc | 27820 | 29276 | 12.893 | 0 |
+| ------ | :-:| :-:| :--:| :--:|
+| hackney (default pool) | 18124 | 28185 | 24.161 | 0 |
+| httpc | 14941 | 55652 | 47.802 | 0 |
+| httpc (optimized) | 15289 | 45219 | 44.310 | 13 |
+| ibrowse | 13249 | 19145 | 17.163 | 0 |
+| ibrowse (optimized) | 11720 | 21813 | 25.330 | 0 |
+| lhttpc | - | - | - | - |
 
-Results are from Erlang 17.2.1. Running on Ubuntu 12.04 VM with 4 cores running on a 2013 MacBook Pro.
+Results are from Erlang 20.2. Running on Centos 7.4 VM with 1 cores running on a 2014 MacBook Pro.
 
 httpc performs MUCH worse if {max_keepalive, infinity} is not set on the server.
 

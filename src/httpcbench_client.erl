@@ -9,7 +9,7 @@
          ibrowse_opt/0,
          lhttpc/0]).
 
--define(CALLS, 10000).
+-define(CALLS, 5000).
 
 -define(CYCLE, 20).
 
