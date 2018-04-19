@@ -9,17 +9,25 @@
          ibrowse_opt/0,
          lhttpc/0]).
 
--define(CALLS, 1000).
+-define(CALLS, 10000).
+
+-define(CYCLE, 20).
 
 mb(Memory) ->
     Memory / 1024 / 1024.
 
 test(Fun) ->
     Memory = erlang:memory(total),
+    Time1 = erlang:system_time(millisecond),
     io:format("Starting ~p calls (~.3f MB)~n", [?CALLS, mb(Memory)]),
-    test_loop(Fun, Memory, 0, 0, 0, 0).
+    test_loop(Fun, Memory, 0, 0, 0, 0, 0),
+    io:format("Total custome time ~.3fs~n", [(erlang:system_time(millisecond)-Time1)/1000]).
 
-test_loop(Fun, Memory, Count, RunTime, ClockTime, Failures) ->
+test_loop(Fun, Memory, Count, RunTime, ClockTime, Failures, ?CYCLE) ->
+    io:format("Test complete!!~n
+               Avg rt: ~.6f, Avg ct: ~.6f~n", [RunTime/Count, ClockTime/Count]);
+
+test_loop(Fun, Memory, Count, RunTime, ClockTime, Failures, Cycle) ->
     statistics(runtime),
     statistics(wall_clock),
     ok = start_calls(Fun, ?CALLS),
@@ -39,7 +47,7 @@ test_loop(Fun, Memory, Count, RunTime, ClockTime, Failures) ->
                mb(Memory2 - Memory), 
                Failures2 + Failures]),
     test_loop(Fun, Memory, 
-              Count + ?CALLS, RunTime2 + RunTime, ClockTime2 + ClockTime, Failures2 + Failures).
+              Count + ?CALLS, RunTime2 + RunTime, ClockTime2 + ClockTime, Failures2 + Failures, Cycle+1).
 
 start_calls(_, 0) ->
     ok;
@@ -77,7 +85,7 @@ hackney() ->
     ok.
 
 hackney_get() ->
-    {ok, 200, _Headers, Ref} = hackney:get(<<"https://localhost:8443/delay">>, [], <<>>, 
+    {ok, 200, _Headers, Ref} = hackney:get(<<"http://localhost:8443/delay">>, [], <<>>, 
                                            [{pool, default},
                                             {ssl_options, [{verify, verify_peer},
                                                            {cacertfile, "./priv/ssl/rootCA.pem"}
@@ -94,7 +102,7 @@ httpc() ->
 
 httpc_get() ->
     {ok, {{_, 200, _}, _, _}} =
-        httpc:request(get, {"https://localhost:8443/delay", []}, 
+        httpc:request(get, {"http://localhost:8443/delay", []}, 
                       [{ssl, [{verify, verify_peer},
                               {cacertfile, "./priv/ssl/rootCA.pem"}
                              ]}], 
@@ -111,7 +119,7 @@ httpc_opt() ->
 
 httpc_opt_get() ->
     {ok, {{_, 200, _}, _, _}} =
-        httpc:request(get, {"https://localhost:8443/delay", []}, 
+        httpc:request(get, {"http://localhost:8443/delay", []}, 
                       [{ssl, [{verify, verify_peer},
                               {cacertfile, "./priv/ssl/rootCA.pem"}
                              ]}], 
@@ -126,7 +134,7 @@ lhttpc() ->
 
 lhttpc_get() ->
     {ok, {{200, _}, _, _}} =
-        lhttpc:request("https://localhost:8443/delay", get, [], [], infinity, 
+        lhttpc:request("http://localhost:8443/delay", get, [], [], infinity, 
                        [{connect_options, [{verify, verify_peer},
                                            {cacertfile, "./priv/ssl/rootCA.pem"}
                                           ]}]),
@@ -149,7 +157,7 @@ ibrowse_opt() ->
     ok.
 
 ibrowse_get() ->
-    case ibrowse:send_req("https://localhost:8443/delay", [], get, [],
+    case ibrowse:send_req("http://localhost:8443/delay", [], get, [],
                           [{ssl_options, [{verify, verify_peer},
                                           {cacertfile, "./priv/ssl/rootCA.pem"}
                                          ]}],
